@@ -44,7 +44,7 @@ if [ -e "${apr_install_dir}/bin/apr-1-config" ]; then
 
 #安装apr-util
 wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
-if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
+if [ -e "${source_dir}/apr-util-${apr_version}.tar.gz" ]; then
     echo "Apr download successfully! "
     tar xzf ${source_dir}/apr-util-${apr_util_version}.tar.gz
     cd ${source_dir}/apr-util-${apr_util_version}
