@@ -4,7 +4,7 @@ for Package in ${pkgList}; do
     dnf -y install ${Package}
     done
 dnf -y update bash openssl glibc
-sed -i "s@^#Port 22@Port 22122@" /etc/ssh/sshd_config
+sed -i "s@^#Port 22@Port ${ssh_port}@" /etc/ssh/sshd_config
 sed -i "s@^#PermitRootLogin.*@PermitRootLogin yes@" /etc/ssh/sshd_config
 systemctl enable sshd && systemctl enable chronyd
 
@@ -43,9 +43,9 @@ if [ -e "${apr_install_dir}/bin/apr-1-config" ]; then
 #结束安装apr
 
 #安装apr-util
+wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
 if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
     echo "Apr download successfully! "
-    wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
     tar xzf ${source_dir}/apr-util-${apr_util_version}.tar.gz
     cd ${source_dir}/apr-util-${apr_util_version}
     ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} ${apr_util_additional}
@@ -53,14 +53,14 @@ if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
     cd ${source_dir}
     rm -rf ${source_dir}/apr-util-${apr_util_ver}
   else
-    echo "Apr download Failed! "
+    echo "Apr-util download Failed! "
   fi
 if [ -e "${apr_install_dir}/bin/apu-1-config" ]; then
-    echo "Apr installed successfully! "
-    echo "Apr installed successfully! "
-    echo "Apr installed successfully! "
+    echo "Apr-util installed successfully! "
+    echo "Apr-util installed successfully! "
+    echo "Apr-util installed successfully! "
   else
-    echo "Apr installed Failed! "
-    echo "Apr installed Failed! "
-    echo "Apr installed Failed! "
+    echo "Apr-util installed Failed! "
+    echo "Apr-util installed Failed! "
+    echo "Apr-util installed Failed! "
   fi
