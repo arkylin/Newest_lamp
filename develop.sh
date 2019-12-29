@@ -15,11 +15,8 @@ wget https://raw.githubusercontent.com/arkylin/open_shell/master/options.conf
 
 mkdir -p ${app_dir} ${source_dir} ${data_dir} ${apache_install_dir} ${apache_config_dir} ${php74_install_dir}
 
-#进入源码目录
-cd ${source_dir}
-
 #安装apr
-wget ${Mirror_source}/apache//apr/apr-${apr_version}.tar.gz
+wget -P ${source_dir} ${Mirror_source}/apache//apr/apr-${apr_version}.tar.gz
 if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
     echo "Apr download successfully! "
     tar xzf ${source_dir}/apr-${apr_version}.tar.gz
@@ -43,15 +40,15 @@ if [ -e "${apr_install_dir}/bin/apr-1-config" ]; then
 #结束安装apr
 
 #安装apr-util
-wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
-if [ -e "${source_dir}/apr-util-${apr_version}.tar.gz" ]; then
+wget -P ${source_dir} ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
+if [ -e "${source_dir}/apr-util-${apr_util_version}.tar.gz" ]; then
     echo "Apr download successfully! "
     tar xzf ${source_dir}/apr-util-${apr_util_version}.tar.gz
     cd ${source_dir}/apr-util-${apr_util_version}
     ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} ${apr_util_additional}
     make -j ${THREAD} && make install
     cd ${source_dir}
-    rm -rf ${source_dir}/apr-util-${apr_util_ver}
+    rm -rf ${source_dir}/apr-util-${apr_util_version}
   else
     echo "Apr-util download Failed! "
   fi
