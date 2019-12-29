@@ -24,6 +24,8 @@ if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
     echo "Apr download successfully! "
     tar xzf ${source_dir}/apr-${apr_version}.tar.gz
     cd ${source_dir}/apr-${apr_version}
+    rm -rf ${source_dir}/apr-${apr_version}/configure
+    wget https://raw.githubusercontent.com/arkylin/open_shell/master/apr-${apr_version}/configure
     ./configure --prefix=${apr_install_dir}
     make -j ${THREAD} && make install
     cd ${source_dir}
