@@ -18,7 +18,7 @@ mkdir -p ${app_dir} ${source_dir} ${data_dir} ${apache_install_dir} ${apache_con
 #进入源码目录
 cd ${source_dir}
 
-#安装apr
+#安装 apr
 wget ${Mirror_source}/apache//apr/apr-${apr_version}.tar.gz
 if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
     echo "Apr download successfully! "
@@ -43,9 +43,9 @@ if [ -e "${apr_install_dir}/bin/apr-1-config" ]; then
     echo "Apr installed Failed! "
     echo "Apr installed Failed! "
   fi
-#结束安装apr
+#结束安装 apr
 
-#安装apr-util
+#安装 apr-util
 wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
 if [ -e "${source_dir}/apr-util-${apr_util_version}.tar.gz" ]; then
     echo "Apr download successfully! "
@@ -54,7 +54,7 @@ if [ -e "${source_dir}/apr-util-${apr_util_version}.tar.gz" ]; then
     ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} ${apr_util_additional}
     make -j ${THREAD} && make install
     cd ${source_dir}
-    rm -rf ${source_dir}/apr-util-${apr_util_version}
+    rm -rf ${source_dir}/apr-util-${apr_util_version} ${source_dir}/apr-util-${apr_util_version}.tar.gz
   else
     echo "Apr-util download Failed! "
   fi
@@ -67,3 +67,28 @@ if [ -e "${apr_install_dir}/bin/apu-1-config" ]; then
     echo "Apr-util installed Failed! "
     echo "Apr-util installed Failed! "
   fi
+#结束安装 apr-util
+
+# 安装 Apache
+wget http://mirrors.tuna.tsinghua.edu.cn/apache//httpd/httpd-${Apache_version}.tar.gz
+if [ -e "${source_dir}/httpd-${Apache_version}.tar.gz" ]; then
+    echo "Apr download successfully! "
+    tar xzf ${source_dir}/httpd-${Apache_version}.tar.gz
+    cd ${source_dir}/httpd-${Apache_version}
+    ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl --with-ssl --enable-http2 --with-nghttp2 ${Apache_additional}
+    make -j ${THREAD} && make install
+    cd ${source_dir}
+    rm -rf ${source_dir}/httpd-${Apache_version} ${source_dir}/httpd-${Apache_version}.tar.gz
+  else
+    echo "Apache download Failed! "
+  fi
+if [ -e "${apr_install_dir}/bin/apu-1-config" ]; then
+    echo "Apache installed successfully! "
+    echo "Apache installed successfully! "
+    echo "Apache installed successfully! "
+  else
+    echo "Apache installed Failed! "
+    echo "Apache installed Failed! "
+    echo "Apache installed Failed! "
+  fi
+#结束安装 Apache
