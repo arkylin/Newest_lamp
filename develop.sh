@@ -14,7 +14,7 @@ wget ${Other_files_for_lamp}/options.conf
 
 . /develop/options.conf
 
-mkdir -p ${app_dir} ${source_dir} ${data_dir} ${apache_install_dir} ${apache_config_dir} ${php74_install_dir}
+mkdir -p ${app_dir} ${source_dir} ${data_dir} ${apache_install_dir} ${apache_config_dir} ${wwwroot_dir} ${wwwroot_dir}/default ${wwwlogs_dir} ${php74_install_dir}
 
 #进入源码目录
 cd ${source_dir}
@@ -173,7 +173,7 @@ ProtocolsHonorOrder On
 PidFile /var/run/httpd.pid
 ServerTokens ProductOnly
 ServerSignature Off
-Include conf/vhost/*.conf
+Include ${apache_config_dir}/*.conf
 EOF
 
     cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
