@@ -454,3 +454,4 @@ else
   echo "PHP-${PHP_main_version} installed Failed! "
   echo "PHP-${PHP_main_version} installed Failed! "
 fi
+# 结束安装 PHP
