@@ -309,8 +309,6 @@ if [ -e "${source_dir}/php-${PHP_main_version}.tar.gz" ]; then
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
     --with-gettext --enable-soap --disable-debug ${php_modules_options}
   make -j ${THREAD} && make install
-  cd ${source_dir}
-  rm -rf ${source_dir}/php-${PHP_main_version}.tar.gz
   [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${php_install_dir}/bin:\$PATH" >> /etc/profile
   [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${php_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${php_install_dir}/bin:\1@" /etc/profile
   . /etc/profile
@@ -438,6 +436,9 @@ EOF
     sed -i "s@^pm.min_spare_servers.*@pm.min_spare_servers = 50@" ${php_install_dir}/etc/php-fpm.conf
     sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
   fi
+
+  cd ${source_dir}
+  rm -rf ${source_dir}/php-${PHP_main_version}.tar.gz
 
 else
   echo "PHP-${PHP_main_version} download Failed! "
