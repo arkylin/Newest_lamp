@@ -297,10 +297,9 @@ if [ -e "${source_dir}/php-${PHP_main_version}.tar.gz" ]; then
   tar xzf ${source_dir}/php-${PHP_main_version}.tar.gz
   cd ${source_dir}/php-${PHP_main_version}
   mkdir -p ${php_install_dir}
-  make clean
   ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache --disable-fileinfo \
+    --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --disable-fileinfo \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
     --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
