@@ -2,7 +2,7 @@
 Other_files_for_lamp="https://raw.githubusercontent.com/arkylin/other_files_for_lamp/master"
 pkgList="java jemalloc jemalloc-devel openssh-server python python-devel python2 python2-devel oniguruma-devel rpcgen go htop libicu icu deltarpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel glibc glibc-devel krb5-devel libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel libxslt-devel libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre pcre-devel libmcrypt libmcrypt-devel mhash mhash-devel mcrypt zip unzip sqlite-devel sysstat patch bc expect expat-devel oniguruma oniguruma-devel libtirpc-devel nss nss-devel rsync rsyslog git lsof lrzsz psmisc wget which libatomic tmux"
 Apache_pkg="jansson jansson-devel diffutils nghttp2 libnghttp2 libnghttp2-devel"
-PHP_pkg="curl curl-devel freetype freetype-devel argon2 libsodium libsodium-devel mhash mhash-devel"
+PHP_pkg="curl curl-devel freetype freetype-devel argon2 libargon2 libargon2-devel libsodium libsodium-devel mhash mhash-devel"
 pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg}"
 
 for Package in ${pkgList}; do
@@ -263,7 +263,7 @@ if [ -e "${source_dir}/php-${PHP_main_version}.tar.gz" ]; then
     cd libiconv-${PHP_libiconv_version}
     mkdir -p ${libiconv_install_dir}
     ./configure --prefix=${libiconv_install_dir}
-    make -j ${THREAD} && make install
+    make -j ${THREAD} && make install && libtool --finish ${libiconv_install_dir}/lib
     cd ${source_dir}
     rm -rf libiconv-${PHP_libiconv_version}.tar.gz libiconv-${PHP_libiconv_version}
   else
@@ -297,6 +297,7 @@ if [ -e "${source_dir}/php-${PHP_main_version}.tar.gz" ]; then
   tar xzf ${source_dir}/php-${PHP_main_version}.tar.gz
   cd ${source_dir}/php-${PHP_main_version}
   mkdir -p ${php_install_dir}
+  make clean
   ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
     --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache --disable-fileinfo \
