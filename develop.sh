@@ -1,9 +1,14 @@
 #/bin/bash
 Other_files_for_lamp="https://raw.githubusercontent.com/arkylin/other_files_for_lamp/master"
-pkgList="jansson jansson-devel diffutils nghttp2 libnghttp2 libnghttp2-devel java jemalloc jemalloc-devel openssh-server python python-devel python2 python2-devel oniguruma-devel rpcgen go htop libicu icu deltarpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel glibc glibc-devel krb5-devel libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel libxslt-devel libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre pcre-devel libmcrypt libmcrypt-devel mhash mhash-devel mcrypt zip unzip sqlite-devel sysstat patch bc expect expat-devel oniguruma oniguruma-devel libtirpc-devel nss nss-devel rsync rsyslog git lsof lrzsz psmisc wget which libatomic tmux"
+pkgList="java jemalloc jemalloc-devel openssh-server python python-devel python2 python2-devel oniguruma-devel rpcgen go htop libicu icu deltarpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-devel libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel glibc glibc-devel krb5-devel libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel libxslt-devel libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre pcre-devel libmcrypt libmcrypt-devel mhash mhash-devel mcrypt zip unzip sqlite-devel sysstat patch bc expect expat-devel oniguruma oniguruma-devel libtirpc-devel nss nss-devel rsync rsyslog git lsof lrzsz psmisc wget which libatomic tmux"
+Apache_pkg="jansson jansson-devel diffutils nghttp2 libnghttp2 libnghttp2-devel"
+PHP_pkg="curl curl-devel freetype freetype-devel argon2 libsodium libsodium-devel mhash mhash-devel"
+pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg}"
+
 for Package in ${pkgList}; do
-    dnf -y install ${Package}
-    done
+  dnf -y install ${Package}
+  done
+
 dnf -y update bash openssl glibc
 sed -i "s@^#Port 22@Port ${ssh_port}@" /etc/ssh/sshd_config
 sed -i "s@^#PermitRootLogin.*@PermitRootLogin yes@" /etc/ssh/sshd_config
@@ -14,105 +19,140 @@ wget ${Other_files_for_lamp}/options.conf
 
 . /develop/options.conf
 
-mkdir -p ${app_dir} ${source_dir} ${data_dir} ${apache_install_dir} ${apache_config_dir} ${wwwroot_dir} ${wwwroot_dir}/default ${wwwlogs_dir} ${php74_install_dir}
+mkdir -p ${app_dir} ${source_dir} ${data_dir}
 
-#进入源码目录
+# 进入源码目录
 cd ${source_dir}
 
-#安装 apr
+if [ ${apr_install_dir} = "" ]; then
+  apr_install_dir=${app_dir}/apr-${apr_version}
+fi
+if [ ${apache_install_dir} = "" ]; then
+  apache_install_dir=${app_dir}/httpd-${Apache_version}
+fi
+if [ ${libiconv_install_dir} = "" ]; then
+  libiconv_install_dir=${app_dir}/libiconv-${PHP_libiconv_version}
+fi
+if [ ${php_install_dir} = "" ]; then
+  php_install_dir=${app_dir}/php-${PHP_main_version}
+fi
+
+# 添加用户
+useradd -M -s /sbin/nologin ${run_user}
+
+# 开始安装 Apr
 wget ${Mirror_source}/apache//apr/apr-${apr_version}.tar.gz
+
 if [ -e "${source_dir}/apr-${apr_version}.tar.gz" ]; then
-    echo "Apr download successfully! "
-    tar xzf ${source_dir}/apr-${apr_version}.tar.gz
-    cd ${source_dir}/apr-${apr_version}
-    rm -rf ${source_dir}/apr-${apr_version}/configure
-    wget ${Other_files_for_lamp}/apr-${apr_version}/configure
-    chmod +x configure
-    ./configure --prefix=${apr_install_dir}
-    make -j ${THREAD} && make install
-    cd ${source_dir}
-    rm -rf ${source_dir}/apr-${apr_version} ${source_dir}/apr-${apr_version}.tar.gz
-  else
-    echo "Apr download Failed! "
-  fi
+  echo "Apr-${apr_version} download successfully! "
+  echo "Apr-${apr_version} download successfully! "
+  echo "Apr-${apr_version} download successfully! "
+  tar xzf ${source_dir}/apr-${apr_version}.tar.gz
+  cd ${source_dir}/apr-${apr_version}
+  rm -rf ${source_dir}/apr-${apr_version}/configure
+  wget ${Other_files_for_lamp}/apr-${apr_version}/configure
+  chmod +x configure
+  mkdir -p ${apr_install_dir}
+  ./configure --prefix=${apr_install_dir}
+  make -j ${THREAD} && make install
+  cd ${source_dir}
+  rm -rf ${source_dir}/apr-${apr_version} ${source_dir}/apr-${apr_version}.tar.gz
+else
+  echo "Apr-${apr_version} download Failed! "
+  echo "Apr-${apr_version} download Failed! "
+  echo "Apr-${apr_version} download Failed! "
+fi
+
 if [ -e "${apr_install_dir}/bin/apr-1-config" ]; then
-    echo "Apr installed successfully! "
-    echo "Apr installed successfully! "
-    echo "Apr installed successfully! "
-  else
-    echo "Apr installed Failed! "
-    echo "Apr installed Failed! "
-    echo "Apr installed Failed! "
-  fi
-#结束安装 apr
+  echo "Apr-${apr_version} installed successfully! "
+  echo "Apr-${apr_version} installed successfully! "
+  echo "Apr-${apr_version} installed successfully! "
+else
+  rm -rf ${apr_install_dir}
+  echo "Apr-${apr_version} installed Failed! "
+  echo "Apr-${apr_version} installed Failed! "
+  echo "Apr-${apr_version} installed Failed! "
+fi
+# 结束安装 Apr
 
-#安装 apr-util
+# 开始安装 Apr-util
 wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
+
 if [ -e "${source_dir}/apr-util-${apr_util_version}.tar.gz" ]; then
-    echo "Apr download successfully! "
-    tar xzf ${source_dir}/apr-util-${apr_util_version}.tar.gz
-    cd ${source_dir}/apr-util-${apr_util_version}
-    ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} ${apr_util_additional}
-    make -j ${THREAD} && make install
-    cd ${source_dir}
-    rm -rf ${source_dir}/apr-util-${apr_util_version} ${source_dir}/apr-util-${apr_util_version}.tar.gz
-  else
-    echo "Apr-util download Failed! "
-  fi
+  echo "Apr-util-${apr_util_version} download successfully! "
+  echo "Apr-util-${apr_util_version} download successfully! "
+  echo "Apr-util-${apr_util_version} download successfully! "
+  tar xzf ${source_dir}/apr-util-${apr_util_version}.tar.gz
+  cd ${source_dir}/apr-util-${apr_util_version}
+  ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} ${apr_util_additional}
+  make -j ${THREAD} && make install
+  cd ${source_dir}
+  rm -rf ${source_dir}/apr-util-${apr_util_version} ${source_dir}/apr-util-${apr_util_version}.tar.gz
+else
+  echo "Apr-util-${apr_util_version} download Failed! "
+  echo "Apr-util-${apr_util_version} download Failed! "
+  echo "Apr-util-${apr_util_version} download Failed! "
+fi
+
 if [ -e "${apr_install_dir}/bin/apu-1-config" ]; then
-    echo "Apr-util installed successfully! "
-    echo "Apr-util installed successfully! "
-    echo "Apr-util installed successfully! "
-  else
-    echo "Apr-util installed Failed! "
-    echo "Apr-util installed Failed! "
-    echo "Apr-util installed Failed! "
-  fi
-#结束安装 apr-util
+  echo "Apr-util-${apr_util_version} installed successfully! "
+  echo "Apr-util-${apr_util_version} installed successfully! "
+  echo "Apr-util-${apr_util_version} installed successfully! "
+else
+  rm -rf ${apr_install_dir}
+  echo "Apr-util-${apr_util_version} installed Failed! "
+  echo "Apr-util-${apr_util_version} installed Failed! "
+  echo "Apr-util-${apr_util_version} installed Failed! "
+fi
+# 结束安装 Apr-util
 
-# 安装 Apache
+# 开始安装 Apache
 wget ${Mirror_source}/apache//httpd/httpd-${Apache_version}.tar.gz
+
 if [ -e "${source_dir}/httpd-${Apache_version}.tar.gz" ]; then
-    echo "Apr download successfully! "
-    tar xzf ${source_dir}/httpd-${Apache_version}.tar.gz
-    cd ${source_dir}/httpd-${Apache_version}
-    ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl --with-ssl --enable-http2 --with-nghttp2 ${Apache_additional}
-    make -j ${THREAD} && make install
-    cd ${source_dir}
-    rm -rf ${source_dir}/httpd-${Apache_version} ${source_dir}/httpd-${Apache_version}.tar.gz
-    [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${apache_install_dir}/bin:\$PATH" >> /etc/profile
-    [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${apache_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${apache_install_dir}/bin:\1@" /etc/profile
-    . /etc/profile
-    cd ${Startup_dir}
-    wget ${Other_files_for_lamp}/init.d/httpd.service
-    cd ${source_dir}
-    sed -i "s@/usr/local/apache@${apache_install_dir}@g" ${Startup_dir}/httpd.service
-    systemctl enable httpd
+  echo "Apache-${Apache_version} download successfully! "
+  echo "Apache-${Apache_version} download successfully! "
+  echo "Apache-${Apache_version} download successfully! "
+  tar xzf ${source_dir}/httpd-${Apache_version}.tar.gz
+  cd ${source_dir}/httpd-${Apache_version}
+  mkdir -p ${apache_install_dir} ${apache_config_dir} ${wwwroot_dir} ${wwwroot_dir}/default ${wwwlogs_dir}
+  ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl --with-ssl --enable-http2 --with-nghttp2 ${Apache_additional}
+  make -j ${THREAD} && make install
+  cd ${source_dir}
+  rm -rf ${source_dir}/httpd-${Apache_version} ${source_dir}/httpd-${Apache_version}.tar.gz
+  [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${apache_install_dir}/bin:\$PATH" >> /etc/profile
+  [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${apache_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${apache_install_dir}/bin:\1@" /etc/profile
+  . /etc/profile
+  cd ${Startup_dir}
+  wget ${Other_files_for_lamp}/init.d/httpd.service
+  cd ${source_dir}
+  sed -i "s@/usr/local/apache@${apache_install_dir}@g" ${Startup_dir}/httpd.service
+  systemctl enable httpd
 
-    # config
-    sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
-    sed -i "s@^Group daemon@Group ${run_user}@" ${apache_install_dir}/conf/httpd.conf
-    sed -i 's/^#ServerName www.example.com:80/ServerName 127.0.0.1:88/' ${apache_install_dir}/conf/httpd.conf
-    sed -i 's@^Listen.*@Listen 127.0.0.1:88@' ${apache_install_dir}/conf/httpd.conf
-    TMP_PORT=88
-    sed -i "s@AddType\(.*\)Z@AddType\1Z\n    AddType application/x-httpd-php .php .phtml\n    AddType application/x-httpd-php-source .phps@" ${apache_install_dir}/conf/httpd.conf
-    sed -i "s@#AddHandler cgi-script .cgi@AddHandler cgi-script .cgi .pl@" ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_proxy.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_proxy_fcgi.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_suexec.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_vhost_alias.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_rewrite.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_deflate.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_expires.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_ssl.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -ri 's@^#(LoadModule.*mod_http2.so)@\1@' ${apache_install_dir}/conf/httpd.conf
-    sed -i 's@DirectoryIndex index.html@DirectoryIndex index.html index.php@' ${apache_install_dir}/conf/httpd.conf
-    sed -i "s@^DocumentRoot.*@DocumentRoot \"${wwwroot_dir}/default\"@" ${apache_install_dir}/conf/httpd.conf
-    sed -i "s@^<Directory \"${apache_install_dir}/htdocs\">@<Directory \"${wwwroot_dir}/default\">@" ${apache_install_dir}/conf/httpd.conf
-    sed -i "s@^#Include conf/extra/httpd-mpm.conf@Include conf/extra/httpd-mpm.conf@" ${apache_install_dir}/conf/httpd.conf
+  # config
+  sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
+  sed -i "s@^Group daemon@Group ${run_user}@" ${apache_install_dir}/conf/httpd.conf
+  sed -i 's/^#ServerName www.example.com:80/ServerName 127.0.0.1:88/' ${apache_install_dir}/conf/httpd.conf
+  sed -i 's@^Listen.*@Listen 127.0.0.1:88@' ${apache_install_dir}/conf/httpd.conf
+  TMP_PORT=88
+  sed -i "s@AddType\(.*\)Z@AddType\1Z\n    AddType application/x-httpd-php .php .phtml\n    AddType application/x-httpd-php-source .phps@" ${apache_install_dir}/conf/httpd.conf
+  sed -i "s@#AddHandler cgi-script .cgi@AddHandler cgi-script .cgi .pl@" ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_proxy.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_proxy_fcgi.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_suexec.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_vhost_alias.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_rewrite.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_deflate.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_expires.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_ssl.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -ri 's@^#(LoadModule.*mod_http2.so)@\1@' ${apache_install_dir}/conf/httpd.conf
+  sed -i 's@DirectoryIndex index.html@DirectoryIndex index.html index.php@' ${apache_install_dir}/conf/httpd.conf
+  sed -i "s@^DocumentRoot.*@DocumentRoot \"${wwwroot_dir}/default\"@" ${apache_install_dir}/conf/httpd.conf
+  sed -i "s@^<Directory \"${apache_install_dir}/htdocs\">@<Directory \"${wwwroot_dir}/default\">@" ${apache_install_dir}/conf/httpd.conf
+  sed -i "s@^#Include conf/extra/httpd-mpm.conf@Include conf/extra/httpd-mpm.conf@" ${apache_install_dir}/conf/httpd.conf
 
-    #logrotate apache log
-    cat > /etc/logrotate.d/apache << EOF
+  # logrotate apache log
+  cat > /etc/logrotate.d/apache << EOF
 ${wwwlogs_dir}/*apache.log {
   daily
   rotate 5
@@ -126,9 +166,11 @@ ${wwwlogs_dir}/*apache.log {
   endscript
 }
 EOF
-    mkdir ${apache_install_dir}/conf/vhost
-    Apache_fcgi=$(echo -e "<Files ~ (\\.user.ini|\\.htaccess|\\.git|\\.svn|\\.project|LICENSE|README.md)\$>\n    Order allow,deny\n    Deny from all\n  </Files>\n  <FilesMatch \\.php\$>\n    SetHandler \"proxy:unix:/dev/shm/php-cgi.sock|fcgi://localhost\"\n  </FilesMatch>")
-    cat > ${apache_install_dir}/conf/vhost/0.conf << EOF
+
+  mkdir -p ${apache_install_dir}/conf/vhost
+  Apache_fcgi=$(echo -e "<Files ~ (\\.user.ini|\\.htaccess|\\.git|\\.svn|\\.project|LICENSE|README.md)\$>\n    Order allow,deny\n    Deny from all\n  </Files>\n  <FilesMatch \\.php\$>\n    SetHandler \"proxy:unix:/dev/shm/php-cgi.sock|fcgi://localhost\"\n  </FilesMatch>")
+
+  cat > ${apache_install_dir}/conf/vhost/0.conf << EOF
 <VirtualHost *:$TMP_PORT>
   ServerAdmin admin@example.com
   DocumentRoot "${wwwroot_dir}/default"
@@ -158,7 +200,7 @@ EOF
 </VirtualHost>
 EOF
 
-    cat >> ${apache_install_dir}/conf/httpd.conf <<EOF
+  cat >> ${apache_install_dir}/conf/httpd.conf <<EOF
 <IfModule mod_headers.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/javascript
   <FilesMatch "\.(js|css|html|htm|png|jpg|swf|pdf|shtml|xml|flv|gif|ico|jpeg)\$">
@@ -176,24 +218,111 @@ ServerSignature Off
 Include ${apache_config_dir}/*.conf
 EOF
 
-    cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
+  cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
 LoadModule remoteip_module modules/mod_remoteip.so
 RemoteIPHeader X-Forwarded-For
 RemoteIPInternalProxy 127.0.0.1
 EOF
-    sed -i "s@Include conf/extra/httpd-mpm.conf@Include conf/extra/httpd-mpm.conf\nInclude conf/extra/httpd-remoteip.conf@" ${apache_install_dir}/conf/httpd.conf
-    sed -i "s@LogFormat \"%h %l@LogFormat \"%h %a %l@g" ${apache_install_dir}/conf/httpd.conf
-    ldconfig
-  else
-    echo "Apache download Failed! "
-  fi
+
+  sed -i "s@Include conf/extra/httpd-mpm.conf@Include conf/extra/httpd-mpm.conf\nInclude conf/extra/httpd-remoteip.conf@" ${apache_install_dir}/conf/httpd.conf
+  sed -i "s@LogFormat \"%h %l@LogFormat \"%h %a %l@g" ${apache_install_dir}/conf/httpd.conf
+  ldconfig
+else
+    echo "Apache-${Apache_version} download Failed! "
+    echo "Apache-${Apache_version} download Failed! "
+    echo "Apache-${Apache_version} download Failed! "
+fi
+
 if [ -e "${apache_install_dir}/bin/httpd" ]; then
-    echo "Apache installed successfully! "
-    echo "Apache installed successfully! "
-    echo "Apache installed successfully! "
+  echo "Apache-${Apache_version} installed successfully! "
+  echo "Apache-${Apache_version} installed successfully! "
+  echo "Apache-${Apache_version} installed successfully! "
+else
+  rm -rf ${apache_install_dir}
+  echo "Apache-${Apache_version} installed Failed! "
+  echo "Apache-${Apache_version} installed Failed! "
+  echo "Apache-${Apache_version} installed Failed! "
+fi
+# 结束安装 Apache
+
+# 开始安装 PHP
+wget ${PHP_source}/php-${PHP_main_version}.tar.gz
+wget ${PHP_libiconv}/libiconv-${PHP_libiconv_version}.tar.gz
+
+if [ -e "${source_dir}/php-${PHP_main_version}.tar.gz" ]; then
+  echo "PHP-${PHP_main_version} download successfully! "
+  echo "PHP-${PHP_main_version} download successfully! "
+  echo "PHP-${PHP_main_version} download successfully! "
+
+  # libiconv
+  if [ -e "${source_dir}/libiconv-${PHP_libiconv_version}.tar.gz" ]; then
+    echo "libiconv-${PHP_libiconv_version} download successfully! "
+    echo "libiconv-${PHP_libiconv_version} download successfully! "
+    echo "libiconv-${PHP_libiconv_version} download successfully! "
+    tar xzf libiconv-${PHP_libiconv_version}.tar.gz
+    cd libiconv-${PHP_libiconv_version}
+    mkdir -p ${libiconv_install_dir}
+    ./configure --prefix=${libiconv_install_dir}
+    make -j ${THREAD} && make install
+    cd ${source_dir}
+    rm -rf libiconv-${PHP_libiconv_version}.tar.gz libiconv-${PHP_libiconv_version}
   else
-    echo "Apache installed Failed! "
-    echo "Apache installed Failed! "
-    echo "Apache installed Failed! "
+    echo "libiconv-${PHP_libiconv_version} download Failed! "
+    echo "libiconv-${PHP_libiconv_version} download Failed! "
+    echo "libiconv-${PHP_libiconv_version} download Failed! "
   fi
-#结束安装 Apache
+
+  if [ -e "${libiconv_install_dir}/lib/libiconv.la" ]; then
+    echo "libiconv-${PHP_libiconv_version} installed successfully! "
+    echo "libiconv-${PHP_libiconv_version} installed successfully! "
+    echo "libiconv-${PHP_libiconv_version} installed successfully! "
+  else
+    rm -rf ${libiconv_install_dir}
+    echo "libiconv-${PHP_libiconv_version} installed Failed! "
+    echo "libiconv-${PHP_libiconv_version} installed Failed! "
+    echo "libiconv-${PHP_libiconv_version} installed Failed! "
+  fi
+  
+  [ -z "`grep /usr/local/lib /etc/ld.so.conf.d/*.conf`" ] && echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
+
+  if [ "${OS_BIT}" == '64' ]; then
+    [ ! -e "/lib64/libpcre.so.1" ] && ln -s /lib64/libpcre.so.0.0.1 /lib64/libpcre.so.1
+    [ ! -e "/usr/lib/libc-client.so" ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
+  else
+    [ ! -e "/lib/libpcre.so.1" ] && ln -s /lib/libpcre.so.0.0.1 /lib/libpcre.so.1
+  fi
+
+  ldconfig
+
+  tar xzf ${source_dir}/php-${PHP_main_version}.tar.gz
+  cd ${source_dir}/php-${PHP_main_version}
+  mkdir -p ${php_install_dir}
+  ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
+    --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
+    --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache --disable-fileinfo \
+    --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+    --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
+    --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+    --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
+    --enable-mbstring --with-password-argon2 --with-sodium --enable-gd --with-openssl \
+    --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+    --with-gettext --enable-soap --disable-debug ${php_modules_options}
+  make -j ${THREAD} && make install
+  cd ${source_dir}
+  rm -rf ${source_dir}/php-${PHP_main_version} ${source_dir}/php-${PHP_main_version}.tar.gz
+else
+  echo "PHP-${PHP_main_version} download Failed! "
+  echo "PHP-${PHP_main_version} download Failed! "
+  echo "PHP-${PHP_main_version} download Failed! "
+fi
+
+if [ -e "${php_install_dir}/bin/phpize" ]; then
+  echo "PHP-${PHP_main_version} installed successfully! "
+  echo "PHP-${PHP_main_version} installed successfully! "
+  echo "PHP-${PHP_main_version} installed successfully! "
+else
+  rm -rf ${php_install_dir}
+  echo "PHP-${PHP_main_version} installed Failed! "
+  echo "PHP-${PHP_main_version} installed Failed! "
+  echo "PHP-${PHP_main_version} installed Failed! "
+fi
