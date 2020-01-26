@@ -16,6 +16,11 @@ mkdir -p /data/{ssl,vhost/apache,wwwroot,wwwroot/default,wwwlogs}
 docker run -itd --name super --hostname super.xyz.blue --net host --privileged=true -v /data:/data arkylin/newest_lamp:latest /sbin/init
 ```
 
+三、初始化Mysql
+```
+mysql_secure_installation
+```
+
 注：-V 冒号":"前面的目录是宿主机目录，后面的目录是容器内目录。</br>
 
 Apache配置命令</br>

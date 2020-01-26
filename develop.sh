@@ -472,4 +472,8 @@ Install_Mysql() {
   # 结束安装 Mysql
 }
 
-Install_Apr && Install_Apr_util && Install_Apache && Install_PHP && Install_Mysql
+if [ "${Mysql_install}" == 'true' ]; then
+  Install_Apr && Install_Apr_util && Install_Apache && Install_PHP && Install_Mysql
+else
+  Install_Apr && Install_Apr_util && Install_Apache && Install_PHP
+fi
