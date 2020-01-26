@@ -77,7 +77,7 @@ Install_Apr() {
   # 结束安装 Apr
 }
 
-Install_Apr-util() {
+Install_Apr_util() {
   # 开始安装 Apr-util
   wget ${Mirror_source}/apache//apr/apr-util-${apr_util_version}.tar.gz
 
@@ -472,4 +472,4 @@ Install_Mysql() {
   # 结束安装 Mysql
 }
 
-Install_Apr && Install_Apr-util && Install_Apache && Install_PHP && Install_Mysql
+Install_Apr && Install_Apr_util && Install_Apache && Install_PHP && Install_Mysql
