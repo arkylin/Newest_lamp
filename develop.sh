@@ -132,7 +132,7 @@ Install_Apache() {
     wget ${Other_files_for_lamp}/init.d/httpd.service
     cd ${source_dir}
     sed -i "s@/usr/local/apache@${apache_install_dir}@g" ${Startup_dir}/httpd.service
-    # systemctl enable httpd
+    systemctl enable httpd
 
     # config
     sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
@@ -358,7 +358,7 @@ EOF
     wget ${Other_files_for_lamp}/init.d/php-fpm.service
     cd ${source_dir}
     sed -i "s@/usr/local/php@${php_install_dir}@g" ${Startup_dir}/php-fpm.service
-    # systemctl enable php-fpm
+    systemctl enable php-fpm
 
     cat > ${php_install_dir}/etc/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -477,13 +477,3 @@ if [ "${Mysql_install}" == 'true' ]; then
 else
   Install_Apr && Install_Apr_util && Install_Apache && Install_PHP
 fi
-
-cat > /start.sh <<EOF
-#/bin/bash
-chown -R www.www /data
-chown -R mysql.mysql /var/lib/mysql
-cp -f /app/apache/conf/vhost/0.conf /data/vhost/apache
-systemctl enable mariadb && systemctl start mariadb
-systemctl enable php-fpm && systemctl start php-fpm
-systemctl enable httpd && systemctl start httpd
-EOF
