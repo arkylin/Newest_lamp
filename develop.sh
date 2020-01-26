@@ -465,4 +465,11 @@ EOF
   # 结束安装 PHP
 }
 
-Install_Apr && Install_Apr-util && Install_Apache && Install_PHP
+Install_Mysql() {
+  # 开始安装 Mysql
+  dnf -y install mysql-server mysql-devel
+  systemctl enable mariadb
+  # 结束安装 Mysql
+}
+
+Install_Apr && Install_Apr-util && Install_Apache && Install_PHP && Install_Mysql
