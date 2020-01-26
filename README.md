@@ -8,12 +8,12 @@
 
 一、添加目录</br>
 ```
-mkdir -p /data/{ssl,vhost/apache,wwwroot,wwwroot/default,wwwlogs}
+mkdir -p /data/{ssl,vhost/apache,mysql,wwwroot,wwwroot/default,wwwlogs}
 ```
 
 二、运行</br>
 ```
-docker run -itd --name super --hostname super.xyz.blue --net host --privileged=true -v /data:/data arkylin/newest_lamp:latest /sbin/init
+docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/mysql:/var/lib/mysql arkylin/newest_lamp:latest
 ```
 
 三、初始化Mysql
@@ -25,7 +25,10 @@ mysql_secure_installation
 
 Apache配置命令</br>
 ```
-mkdir ${apache_install_dir}/conf/vhost
+cp -f /app/apache/conf/vhost/0.conf /data/vhost/apache
+```
+```
+mkdir /data/vhost/apache
 ```
 ```
 domain=super.xyz.blue
@@ -34,22 +37,22 @@ domain=super.xyz.blue
 Apache_fcgi=$(echo -e "<Files ~ (\\.user.ini|\\.htaccess|\\.git|\\.svn|\\.project|LICENSE|README.md)\$>\n    Order allow,deny\n    Deny from all\n  </Files>\n  <FilesMatch \\.php\$>\n    SetHandler \"proxy:unix:/dev/shm/php-cgi.sock|fcgi://localhost\"\n  </FilesMatch>")
 ```
 ```
-Apache_log="CustomLog \"/www/data/wwwlogs/${domain}_apache.log\" common"
+Apache_log="CustomLog \"/data/wwwlogs/${domain}_apache.log\" common"
 ```
 ```
 cat > /data/vhost/apache/${domain}.conf << EOF
 <VirtualHost *:88>
   ServerAdmin admin@xyz.blue
-  DocumentRoot /www/data/wwwroot/${domain}
+  DocumentRoot /data/wwwroot/${domain}
   ServerName ${domain}
   # ServerAlias xyz.blue
   SSLEngine on
   SSLCertificateFile /data/ssl/my.crt
   SSLCertificateKeyFile /data/ssl/my.key
-  ErrorLog /www/data/wwwlogs/${domain}_error_apache.log
+  ErrorLog /data/wwwlogs/${domain}_error_apache.log
   ${Apache_log}
   ${Apache_fcgi}
-<Directory /www/data/wwwroot/${domain}>
+<Directory /data/wwwroot/${domain}>
   SetOutputFilter DEFLATE
   Options FollowSymLinks ExecCGI
   Require all granted
@@ -67,6 +70,15 @@ apachectl -t
 ```
 ```
 apachectl -k graceful
+```
+
+USELESS</br>
+```
+cat >> /root/.bashrc <<EOF
+systemctl restart php-fpm
+systemctl restart httpd
+systemctl restart mariadb
+EOF
 ```
 
 请关注我的博客 https://www.xyz.blue</br>

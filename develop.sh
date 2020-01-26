@@ -132,7 +132,7 @@ Install_Apache() {
     wget ${Other_files_for_lamp}/init.d/httpd.service
     cd ${source_dir}
     sed -i "s@/usr/local/apache@${apache_install_dir}@g" ${Startup_dir}/httpd.service
-    systemctl enable httpd
+    # systemctl enable httpd
 
     # config
     sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
@@ -220,7 +220,7 @@ ProtocolsHonorOrder On
 PidFile /var/run/httpd.pid
 ServerTokens ProductOnly
 ServerSignature Off
-Include ${apache_install_dir}/conf/vhost/*.conf ${apache_config_dir}/*.conf
+Include ${apache_config_dir}/*.conf
 EOF
 
     cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
@@ -358,7 +358,7 @@ EOF
     wget ${Other_files_for_lamp}/init.d/php-fpm.service
     cd ${source_dir}
     sed -i "s@/usr/local/php@${php_install_dir}@g" ${Startup_dir}/php-fpm.service
-    systemctl enable php-fpm
+    # systemctl enable php-fpm
 
     cat > ${php_install_dir}/etc/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -468,7 +468,7 @@ EOF
 Install_Mysql() {
   # 开始安装 Mysql
   dnf -y install mysql-server mysql-devel
-  systemctl enable mariadb
+  # systemctl enable mariadb
   # 结束安装 Mysql
 }
 
@@ -477,3 +477,13 @@ if [ "${Mysql_install}" == 'true' ]; then
 else
   Install_Apr && Install_Apr_util && Install_Apache && Install_PHP
 fi
+
+cat > /start.sh <<EOF
+#/bin/bash
+chown -R www.www /data
+chown -R mysql.mysql /var/lib/mysql
+cp -f /app/apache/conf/vhost/0.conf /data/vhost/apache
+systemctl enable mariadb && systemctl start mariadb
+systemctl enable php-fpm && systemctl start php-fpm
+systemctl enable httpd && systemctl start httpd
+EOF
