@@ -220,7 +220,7 @@ ProtocolsHonorOrder On
 PidFile /var/run/httpd.pid
 ServerTokens ProductOnly
 ServerSignature Off
-Include ${apache_config_dir}/*.conf
+Include ${apache_install_dir}/conf/vhost/*.conf ${apache_config_dir}/*.conf
 EOF
 
     cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
