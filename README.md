@@ -19,9 +19,17 @@ docker run -itd --name super --hostname super.xyz.blue --net host --privileged=t
 Apache配置命令</br>
 ```
 mkdir ${apache_install_dir}/conf/vhost
+```
+```
 domain=super.xyz.blue
+```
+```
 Apache_fcgi=$(echo -e "<Files ~ (\\.user.ini|\\.htaccess|\\.git|\\.svn|\\.project|LICENSE|README.md)\$>\n    Order allow,deny\n    Deny from all\n  </Files>\n  <FilesMatch \\.php\$>\n    SetHandler \"proxy:unix:/dev/shm/php-cgi.sock|fcgi://localhost\"\n  </FilesMatch>")
+```
+```
 Apache_log="CustomLog \"/www/data/wwwlogs/${domain}_apache.log\" common"
+```
+```
 cat > /data/vhost/apache/${domain}.conf << EOF
 <VirtualHost *:88>
   ServerAdmin admin@xyz.blue
@@ -49,6 +57,8 @@ EOF
 使Apache生效</br>
 ```
 apachectl -t
+```
+```
 apachectl -k graceful
 ```
 
