@@ -10,10 +10,16 @@
 ```
 mkdir -p /data/{ssl,vhost/apache,mysql,wwwroot,wwwroot/default,wwwlogs}
 ```
+```
+mkdir -p /data/{ssl,vhost/apache,wwwroot,wwwroot/default,wwwlogs}
+```
 
 二、运行</br>
 ```
 docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/mysql:/var/lib/mysql arkylin/newest_lamp:latest
+```
+```
+docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data arkylin/newest_lamp:latest
 ```
 
 三、初始化Mysql
@@ -121,7 +127,7 @@ experimental_http3
 xyz.blue www.xyz.blue {
 tls /data/ssl/my.crt /data/ssl/my.key
 headers Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
-reverse_proxy / 127.0.0.1:88
+reverse_proxy 127.0.0.1:88
 }
 ```
 分享一个Nextcloud/Owncloud的Caddy 2前端配置文件

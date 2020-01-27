@@ -10,7 +10,7 @@ for Package in ${pkgList}; do
   done
 
 dnf -y update bash openssl glibc
-sed -i "s@^#Port 22@Port ${ssh_port}@" /etc/ssh/sshd_config
+sed -i "s@^#Port 22122@Port ${ssh_port}@" /etc/ssh/sshd_config
 sed -i "s@^#PermitRootLogin.*@PermitRootLogin yes@" /etc/ssh/sshd_config
 systemctl enable sshd
 
