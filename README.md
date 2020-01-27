@@ -113,7 +113,32 @@ EOF
 ```
 前端用Caddy
 ```
-
+{
+http_port 80
+https_port 443
+experimental_http3
+}
+xyz.blue www.xyz.blue {
+tls /data/ssl/my.crt /data/ssl/my.key
+headers Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+reverse_proxy / 127.0.0.1:88
+}
+```
+分享一个Nextcloud/Owncloud的Caddy 2前端配置文件
+```
+aaa.com {
+tls /data/ssl/my.crt /data/ssl/my.key
+headers Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+reverse_proxy / 127.0.0.1:88 {
+header_up Host {http.request.host}
+header_up X-Real-IP {http.request.remote.host}
+header_up X-Forwarded-For {http.request.remote.host}
+header_up X-Forwarded-Port {http.request.port}
+header_up X-Forwarded-Proto {http.request.scheme}
+}
+redir /.well-known/carddav /remote.php/carddav 301
+redir /.well-known/caldav /remote.php/caldav 301
+}
 ```
 
 请关注我的博客 https://www.xyz.blue</br>
