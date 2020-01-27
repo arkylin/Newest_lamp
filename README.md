@@ -81,4 +81,39 @@ systemctl restart mariadb
 EOF
 ```
 
+博客配置
+```
+<VirtualHost *:88>
+  ServerAdmin admin@xyz.blue
+  DocumentRoot /data/wwwroot/www.xyz.blue
+  ServerName www.xyz.blue
+  ServerAlias xyz.blue
+  #SSLEngine on
+  #SSLCertificateFile /data/ssl/my.crt
+  #SSLCertificateKeyFile /data/ssl/my.key
+  ErrorLog /data/wwwlogs/www.xyz.blue_error_apache.log
+  
+  <Files ~ (\.user.ini|\.htaccess|\.git|\.svn|\.project|LICENSE|README.md)$>
+    Order allow,deny
+    Deny from all
+  </Files>
+  <FilesMatch \.php$>
+    SetHandler "proxy:unix:/dev/shm/php-cgi.sock|fcgi://localhost"
+  </FilesMatch>
+<Directory /data/wwwroot/www.xyz.blue>
+  SetOutputFilter DEFLATE
+  Options FollowSymLinks ExecCGI
+  Require all granted
+  AllowOverride All
+  Order allow,deny
+  Allow from all
+  DirectoryIndex index.html index.php
+</Directory>
+</VirtualHost>
+```
+前端用Caddy
+```
+
+```
+
 请关注我的博客 https://www.xyz.blue</br>
