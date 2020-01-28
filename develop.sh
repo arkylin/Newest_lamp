@@ -10,17 +10,19 @@ for Package in ${pkgList}; do
   done
 
 dnf -y update bash openssl glibc
-sed -i "s@^#Port 22@Port ${ssh_port}@" /etc/ssh/sshd_config
-sed -i "s@^#PermitRootLogin.*@PermitRootLogin yes@" /etc/ssh/sshd_config
-systemctl enable sshd
-if [ ${Password} != "" ]; then
-  echo "${Password}" | passwd root --stdin > /dev/null 2>&1
-fi
 
 cd /develop
 wget ${Other_files_for_lamp}/options.conf
 
 . /develop/options.conf
+
+sed -i "s@^#Port 22@Port ${ssh_port}@" /etc/ssh/sshd_config
+sed -i "s@^#PermitRootLogin.*@PermitRootLogin yes@" /etc/ssh/sshd_config
+systemctl enable sshd
+
+if [ ${Password} != "" ]; then
+  echo root:${Password}|chpasswd
+fi
 
 mkdir -p ${app_dir} ${source_dir} ${data_dir}
 
