@@ -468,7 +468,7 @@ EOF
 Install_Mysql() {
   # 开始安装 Mysql
   dnf -y install mysql-server mysql-devel
-  # systemctl enable mariadb
+  systemctl enable mariadb
   # 结束安装 Mysql
 }
 

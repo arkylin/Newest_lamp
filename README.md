@@ -16,10 +16,10 @@ mkdir -p /data/{ssl,vhost/apache,wwwroot,wwwroot/default,wwwlogs}
 
 二、运行</br>
 ```
-docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/mysql:/var/lib/mysql arkylin/newest_lamp:latest
+docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/mysql:/var/lib/mysql arkylin/newest_lamp:latest /usr/sbin/init
 ```
 ```
-docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data arkylin/newest_lamp:latest
+docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data arkylin/newest_lamp:latest /usr/sbin/init
 ```
 
 三、初始化Mysql
@@ -119,6 +119,9 @@ EOF
 ```
 前端用Caddy
 ```
+/app/caddy/c* start --config /app/caddy/C
+```
+```
 {
 http_port 80
 https_port 443
@@ -126,7 +129,7 @@ experimental_http3
 }
 xyz.blue www.xyz.blue {
 tls /data/ssl/my.crt /data/ssl/my.key
-headers Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+header Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
 reverse_proxy 127.0.0.1:88
 }
 ```
@@ -134,7 +137,7 @@ reverse_proxy 127.0.0.1:88
 ```
 aaa.com {
 tls /data/ssl/my.crt /data/ssl/my.key
-headers Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+header Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
 reverse_proxy / 127.0.0.1:88 {
 header_up Host {http.request.host}
 header_up X-Real-IP {http.request.remote.host}
