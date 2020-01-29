@@ -316,17 +316,52 @@ Install_PHP() {
 
     tar xzf ${source_dir}/php-${PHP_install_version}.tar.gz
     cd ${source_dir}/php-${PHP_install_version}
-    mkdir -p ${php_install_dir}
-    ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
-      --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-      --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm \
-      --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-      --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
-      --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-      --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
-      --enable-mbstring --with-password-argon2 --with-sodium --enable-gd --with-openssl \
-      --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-      --with-gettext --enable-soap --disable-debug ${php_modules_options}
+    mkdir -p ${php_install_dir}   
+    
+    if [ "${PHP_install_version}" == "7.4.2" ]; then
+      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
+        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
+        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
+        --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+        --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
+        --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
+        --enable-mbstring --with-password-argon2 --with-sodium --enable-gd --with-openssl \
+        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+        --with-gettext --enable-soap --disable-debug ${php_modules_options}
+    elif [ "${PHP_install_version}" == "7.3.14" ]; then
+      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
+        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
+        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
+        --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
+        --with-libxml-dir --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
+        --enable-mbstring --with-password-argon2 --with-sodium --with-gd --with-openssl \
+        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+        --with-gettext --enable-zip --with-libzip --enable-soap --disable-debug ${php_modules_options}
+    elif [ "${PHP_install_version}" == "5.6.40" ]; then
+      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
+        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
+        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
+        --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
+        --with-libxml-dir --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
+        --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl \
+        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl --enable-intl \
+        --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
+    else
+      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
+        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
+        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
+        --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
+        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
+        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+        --with-gettext --enable-soap --disable-debug ${php_modules_options}
+    fi
+
     make -j ${THREAD} && make install
     [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${php_install_dir}/bin:\$PATH" >> /etc/profile
     [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${php_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${php_install_dir}/bin:\1@" /etc/profile
@@ -377,7 +412,7 @@ EOF
     wget -O "php-fpm${PHP_config_ver}.service" ${Other_files_for_lamp}/init.d/php-fpm.service
     cd ${source_dir}
     sed -i "s@/usr/local/php@${php_install_dir}@g" ${Startup_dir}/php-fpm${PHP_config_ver}.service
-    systemctl enable php-fpm
+    systemctl enable php-fpm${PHP_config_ver}
 
     cat > ${php_install_dir}/etc/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -469,13 +504,13 @@ EOF
     mkdir -p ${source_dir}/extension
 
     for check_imagick in ${PHP_Extension_lists[*]}; do
-    if [ "${check_imagick}" == "imagick" ]; then
-      Install_ImageMagick
+    if [ "${check_imagick}" == "imagick" ] && [ ! -d ${ImageMagick_path} ]; then
+      dnf -y install ImageMagick*
     fi
     done
 
     if [ "${PHP_Extension_lists}" != "" ] && [ "${PHP_Extension_version_lists}" != "" ]; then
-      for num in $(seq 1 ${#PHP_Extension_lists[*]}); do
+      for num in $(seq 0 $[${#PHP_Extension_lists[*]}-1]); do
       extension_name=${PHP_Extension_lists[${num}]}
       extension_version=${PHP_Extension_version_lists[${num}]}
       Install_PHP_Extension
@@ -515,18 +550,6 @@ Install_Redis() {
   sed -i "s@^# unixsocketperm 700@unixsocketperm 777@" /etc/redis.conf
   systemctl enable redis
   # 结束安装 Redis
-}
-
-Install_ImageMagick() {
-  cd ${source_dir}
-  wget ${ImageMagick_source}/ImageMagick.tar.gz
-  tar xzf ImageMagick.tar.gz
-  rm -rf ImageMagick.tar.gz
-  cd ImageMagick*
-  make -j ${THREAD} && make install
-  ldconfig
-  cd ${source_dir}
-  rm -rf ImageMagick*
 }
 
 Install_PHP_Extension() {
