@@ -5,9 +5,8 @@ Apache_pkg="jansson jansson-devel diffutils nghttp2 libnghttp2 libnghttp2-devel"
 PHP_pkg="curl curl-devel freetype freetype-devel argon2 libargon2 libargon2-devel libsodium libsodium-devel mhash mhash-devel gettext gettext-devel"
 PHP_73="libzip libzip-devel"
 PHP_56="re2c"
-pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56}"
-
-dnf -y update
+PostgreSQL="postgresql postgresql-devel"
+pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56} ${PostgreSQL}"
 
 for Package in ${pkgList}; do
   dnf -y install ${Package}
@@ -320,11 +319,21 @@ Install_PHP() {
     cd ${source_dir}/php-${PHP_install_version}
     mkdir -p ${php_install_dir}   
     
-    if [ "${PHP_install_version}" == "7.4.2" ]; then
+    if [ "${PHP_install_version}" == "7.4.2" ] && [ "${Beta}" != "yes" ]; then
       ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
         --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
         --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
         --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+        --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
+        --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
+        --enable-mbstring --with-password-argon2 --with-sodium --enable-gd --with-openssl \
+        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+        --with-gettext --enable-soap --disable-debug ${php_modules_options}
+    elif [ "${PHP_install_version}" == "7.4.2" ] && [ "${Beta}" == "yes" ]; then
+      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
+        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
+        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
         --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
         --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
         --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
@@ -385,9 +394,9 @@ Install_PHP() {
     sed -i 's@^;realpath_cache_size.*@realpath_cache_size = 2M@' ${php_install_dir}/etc/php.ini
     sed -i 's@^disable_functions.*@disable_functions = passthru,exec,system,chroot,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_restore,dl,readlink,symlink,popepassthru,stream_socket_server,fsocket,popen@' ${php_install_dir}/etc/php.ini
     [ -e /usr/sbin/sendmail ] && sed -i 's@^;sendmail_path.*@sendmail_path = /usr/sbin/sendmail -t -i@' ${php_install_dir}/etc/php.ini
-    sed -i "s@^;curl.cainfo.*@curl.cainfo = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
-    sed -i "s@^;openssl.cafile.*@openssl.cafile = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
-    sed -i "s@^;openssl.capath.*@openssl.capath = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
+    sed -i "s@^;curl.cainfo.*@curl.cainfo = \"/etc/pki/tls/certs/ca-bundle.crt\"@" ${php_install_dir}/etc/php.ini
+    sed -i "s@^;openssl.cafile.*@openssl.cafile = \"/etc/pki/tls/certs/ca-bundle.crt\"@" ${php_install_dir}/etc/php.ini
+    sed -i "s@^;openssl.capath.*@openssl.capath = \"/etc/pki/tls/certs/ca-bundle.crt\"@" ${php_install_dir}/etc/php.ini
 
     cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
 [opcache]
