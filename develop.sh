@@ -511,6 +511,12 @@ EOF
     fi
     done
 
+    if [ "${PHP_install_version}" == "7.4.2" ]; then
+      extension_name="zip"
+      extension_version="1.16.1"
+      Install_PHP_Extension
+    fi
+
     if [ "${PHP_Extension_lists}" != "" ] && [ "${PHP_Extension_version_lists}" != "" ]; then
       for num in $(seq 0 $[${#PHP_Extension_lists[*]}-1]); do
       extension_name=${PHP_Extension_lists[${num}]}

@@ -52,9 +52,9 @@ cat > /data/vhost/apache/${domain}.conf << EOF
   DocumentRoot /data/wwwroot/${domain}
   ServerName ${domain}
   # ServerAlias xyz.blue
-  SSLEngine on
-  SSLCertificateFile /data/ssl/my.crt
-  SSLCertificateKeyFile /data/ssl/my.key
+  #SSLEngine on
+  #SSLCertificateFile /data/ssl/my.crt
+  #SSLCertificateKeyFile /data/ssl/my.key
   ErrorLog /data/wwwlogs/${domain}_error_apache.log
   ${Apache_log}
   ${Apache_fcgi}
@@ -138,7 +138,7 @@ reverse_proxy 127.0.0.1:88
 aaa.com {
 tls /data/ssl/my.crt /data/ssl/my.key
 header Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
-reverse_proxy / 127.0.0.1:88 {
+reverse_proxy 127.0.0.1:88 {
 header_up Host {http.request.host}
 header_up X-Real-IP {http.request.remote.host}
 header_up X-Forwarded-For {http.request.remote.host}
@@ -149,5 +149,21 @@ redir /.well-known/carddav /remote.php/carddav 301
 redir /.well-known/caldav /remote.php/caldav 301
 }
 ```
+
+PMA安装指南</br>
+下载解压</br>
+```
+/bin/cp ${wwwroot_dir}/phpMyAdmin/{config.sample.inc.php,config.inc.php}
+mkdir ./{upload,save}
+sed -i "s@UploadDir.*@UploadDir'\] = 'upload';@" config.inc.php
+sed -i "s@SaveDir.*@SaveDir'\] = 'save';@" config.inc.php
+sed -i "s@host'\].*@host'\] = '127.0.0.1';@" config.inc.php
+sed -i "s@blowfish_secret.*;@blowfish_secret\'\] = \'$(cat /dev/urandom | head -1 | base64 | head -c 45)\';@" config.inc.php
+mkdir ${wwwroot_dir}/phpMyAdmin/tmp
+chmod -R 777 ${wwwroot_dir}/phpMyAdmin/tmp
+chown -R www.www ${wwwroot_dir}/phpMyAdmin/
+```
+Docker内安装Mysql/Mariadb提示"服务器和客户端上指示的 HTTPS 之间不匹配"解决方案见我的博客文章</br>
+https://www.xyz.blue/archives/when-installing-mysql-mariadb-in-docker-the-solution-of-mismatch-between-https-indicated-on-server-and-client-will-be-prompted.html
 
 请关注我的博客 https://www.xyz.blue</br>
