@@ -16,7 +16,7 @@ mkdir -p /data/{ssl,vhost/apache,wwwroot,wwwroot/default,wwwlogs}
 
 二、运行</br>
 ```
-docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/mysql:/var/lib/mysql arkylin/newest_lamp:latest /usr/sbin/init
+docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/pgsql:/var/lib/pgsql arkylin/newest_lamp:self-latest /usr/sbin/init
 ```
 ```
 docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data arkylin/newest_lamp:latest /usr/sbin/init

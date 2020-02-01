@@ -5,8 +5,9 @@ Apache_pkg="jansson jansson-devel diffutils nghttp2 libnghttp2 libnghttp2-devel"
 PHP_pkg="curl curl-devel freetype freetype-devel argon2 libargon2 libargon2-devel libsodium libsodium-devel mhash mhash-devel gettext gettext-devel"
 PHP_73="libzip libzip-devel"
 PHP_56="re2c"
-PostgreSQL="postgresql postgresql-devel"
-pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56} ${PostgreSQL}"
+PostgreSQL="postgresql postgresql-server postgresql-devel"
+Change_Password="cracklib-dicts"
+pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56} ${PostgreSQL} ${Change_Password}"
 
 for Package in ${pkgList}; do
   dnf -y install ${Package}
@@ -611,3 +612,8 @@ fi
 
 rm -rf ${source_dir}
 
+# PostgreSQL
+if [ ${Password} != "" ]; then
+  echo postgres:${Password}|chpasswd
+fi
+systemctl enable postgresql
