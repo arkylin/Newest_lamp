@@ -19,6 +19,9 @@ mkdir -p /data/{ssl,vhost/apache,wwwroot,wwwroot/default,wwwlogs}
 docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/pgsql:/var/lib/pgsql arkylin/newest_lamp:self-latest /usr/sbin/init
 ```
 ```
+docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data -v /data/pgsql:/var/lib/pgsql arkylin/workspace:work /usr/sbin/init
+```
+```
 docker run -itd --name super --hostname super.xyz.blue --net host --restart always --privileged -v /data:/data arkylin/newest_lamp:latest /usr/sbin/init
 ```
 
