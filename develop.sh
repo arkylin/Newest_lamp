@@ -47,6 +47,9 @@ fi
 if [ ${php_install_dir} = "" ]; then
   php_install_dir=${app_dir}/php-${PHP_install_version}
 fi
+if [ ${nginx_install_dir} = "" ]; then
+  php_install_dir=${app_dir}/php-${PHP_install_version}
+fi
 
 # 添加用户
 useradd -M -s /sbin/nologin ${run_user}
@@ -260,6 +263,144 @@ EOF
     echo "Apache-${Apache_version} installed Failed! "
   fi
   # 结束安装 Apache
+}
+Install_Nginx() {
+  wget ${Nginx_source}/nginx-${Nginx_version}.tar.gz
+
+  if [ -e "${source_dir}/nginx-${Nginx_version}.tar.gz" ]; then
+    echo "Nginx-${Nginx_version} download successfully! "
+    echo "Nginx-${Nginx_version} download successfully! "
+    echo "Nginx-${Nginx_version} download successfully! "
+    tar xzf nginx-${Nginx_version}.tar.gz
+    cd nginx-${Nginx_version}
+    mkdir -p ${nginx_install_dir} ${nginx_config_dir}
+    sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc
+    ./configure --prefix=${nginx_install_dir} --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl --with-pcre --with-pcre-jit --with-ld-opt='-ljemalloc' ${nginx_modules_options}
+    make -j ${THREAD} && make install
+  else
+    echo "Nginx-${Nginx_version} download Failed! "
+    echo "Nginx-${Nginx_version} download Failed! "
+    echo "Nginx-${Nginx_version} download Failed! "
+  fi
+  if [ -e "${nginx_install_dir}/conf/nginx.conf" ]; then
+    rm -rf ${source_dir}/nginx-${Nginx_version}.tar.gz ${source_dir}/nginx-${Nginx_version}
+    echo "Nginx-${Nginx_version} installed successfully! "
+    echo "Nginx-${Nginx_version} installed successfully! "
+    echo "Nginx-${Nginx_version} installed successfully! "
+    [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${nginx_install_dir}/sbin:\$PATH" >> /etc/profile
+    [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${nginx_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${nginx_install_dir}/sbin:\1@" /etc/profile
+    . /etc/profile
+    cd ${Startup_dir}
+    wget ${Other_files_for_lamp}/init.d/nginx.service
+    cd ${source_dir}
+    sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" ${Startup_dir}/nginx.service
+    systemctl enable nginx
+
+    cat > ${nginx_install_dir}/conf/nginx.conf << EOF
+user ${run_user} ${run_user};
+worker_processes auto;
+
+error_log ${wwwlogs_dir}/error_nginx.log crit;
+pid /var/run/nginx.pid;
+worker_rlimit_nofile 51200;
+
+events {
+  use epoll;
+  worker_connections 51200;
+  multi_accept on;
+}
+
+http {
+  include mime.types;
+  default_type application/octet-stream;
+  server_names_hash_bucket_size 128;
+  client_header_buffer_size 32k;
+  large_client_header_buffers 4 32k;
+  client_max_body_size 1024m;
+  client_body_buffer_size 10m;
+  sendfile on;
+  tcp_nopush on;
+  keepalive_timeout 120;
+  server_tokens off;
+  tcp_nodelay on;
+
+  fastcgi_connect_timeout 300;
+  fastcgi_send_timeout 300;
+  fastcgi_read_timeout 300;
+  fastcgi_buffer_size 64k;
+  fastcgi_buffers 4 64k;
+  fastcgi_busy_buffers_size 128k;
+  fastcgi_temp_file_write_size 128k;
+  fastcgi_intercept_errors on;
+
+  #Gzip Compression
+  gzip on;
+  gzip_buffers 16 8k;
+  gzip_comp_level 6;
+  gzip_http_version 1.1;
+  gzip_min_length 256;
+  gzip_proxied any;
+  gzip_vary on;
+  gzip_types
+    text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml
+    text/javascript application/javascript application/x-javascript
+    text/x-json application/json application/x-web-app-manifest+json
+    text/css text/plain text/x-component
+    font/opentype application/x-font-ttf application/vnd.ms-fontobject
+    image/x-icon;
+  gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+
+  ##Brotli Compression
+  #brotli on;
+  #brotli_comp_level 6;
+  #brotli_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript image/svg+xml;
+
+  ##If you have a lot of static files to serve through Nginx then caching of the files' metadata (not the actual files' contents) can save some latency.
+  #open_file_cache max=1000 inactive=20s;
+  #open_file_cache_valid 30s;
+  #open_file_cache_min_uses 2;
+  #open_file_cache_errors on;
+  include ${nginx_config_dir}/*.conf;
+}
+EOF
+    cat > ${nginx_install_dir}/conf/proxy.conf << EOF
+proxy_connect_timeout 300s;
+proxy_send_timeout 900;
+proxy_read_timeout 900;
+proxy_buffer_size 32k;
+proxy_buffers 4 64k;
+proxy_busy_buffers_size 128k;
+proxy_redirect off;
+proxy_hide_header Vary;
+proxy_set_header Accept-Encoding '';
+proxy_set_header Referer \$http_referer;
+proxy_set_header Cookie \$http_cookie;
+proxy_set_header Host \$host;
+proxy_set_header X-Real-IP \$remote_addr;
+proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto \$scheme;
+EOF
+    # logrotate nginx log
+    cat > /etc/logrotate.d/nginx << EOF
+${wwwlogs_dir}/*nginx.log {
+  daily
+  rotate 5
+  missingok
+  dateext
+  compress
+  notifempty
+  sharedscripts
+  postrotate
+    [ -e /var/run/nginx.pid ] && kill -USR1 \`cat /var/run/nginx.pid\`
+  endscript
+}
+EOF
+    ldconfig
+  else
+    rm -rf ${nginx_install_dir}
+    echo "Nginx-${Nginx_version} installed Failed! "
+    echo "Nginx-${Nginx_version} installed Failed! "
+    echo "Nginx-${Nginx_version} installed Failed! "
 }
 
 Install_libiconv() {
@@ -543,7 +684,7 @@ if [ "${Redis_install}" == 'true' ]; then
   Install_Redis
 fi
 
-Install_Apr && Install_Apr_util && Install_Apache && Install_libiconv && Install_PHP
+Install_Apr && Install_Apr_util && Install_Apache && Install_libiconv && Install_PHP && Install_Nginx
 
 if [ "${PHP_install_lists}" != "" ]; then
   for PHP_install_list in ${PHP_install_lists}; do
