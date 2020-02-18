@@ -319,60 +319,15 @@ Install_PHP() {
     tar xzf ${source_dir}/php-${PHP_install_version}.tar.gz
     cd ${source_dir}/php-${PHP_install_version}
     mkdir -p ${php_install_dir}   
-    
-    if [ "${PHP_install_version}" == "7.4.2" ] && [ "${Beta}" != "yes" ]; then
       ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
         --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
         --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
-        --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-        --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
-        --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
-        --enable-mbstring --with-password-argon2 --with-sodium --enable-gd --with-openssl \
-        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-        --with-gettext --enable-soap --disable-debug ${php_modules_options}
-    elif [ "${PHP_install_version}" == "7.4.2" ] && [ "${Beta}" == "yes" ]; then
-      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
-        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
-        --with-iconv-dir=${libiconv_install_dir} --with-freetype --with-jpeg --with-zlib \
-        --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
-        --enable-mbstring --with-password-argon2 --with-sodium --enable-gd --with-openssl \
-        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-        --with-gettext --enable-soap --disable-debug ${php_modules_options}
-    elif [ "${PHP_install_version}" == "7.3.14" ]; then
-      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
-        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
-        --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
+        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir  --with-png-dir --with-zlib \
         --with-libxml-dir --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
         --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
         --enable-mbstring --with-password-argon2 --with-sodium --with-gd --with-openssl \
         --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
         --with-gettext --enable-zip --with-libzip --enable-soap --disable-debug ${php_modules_options}
-    elif [ "${PHP_install_version}" == "5.6.40" ]; then
-      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
-        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
-        --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
-        --with-libxml-dir --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
-        --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl \
-        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl --enable-intl \
-        --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
-    else
-      ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
-        --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-        --with-fpm-user=${run_user} --with-fpm-group=${run_user} --enable-fpm --enable-opcache \
-        --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-        --with-iconv-dir=${libiconv_install_dir} --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
-        --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex \
-        --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
-        --with-gettext --enable-soap --disable-debug ${php_modules_options}
-    fi
 
     make -j ${THREAD} && make install
     [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${php_install_dir}/bin:\$PATH" >> /etc/profile
@@ -393,7 +348,7 @@ Install_PHP() {
     sed -i 's@^upload_max_filesize.*@upload_max_filesize = 50M@' ${php_install_dir}/etc/php.ini
     sed -i 's@^max_execution_time.*@max_execution_time = 600@' ${php_install_dir}/etc/php.ini
     sed -i 's@^;realpath_cache_size.*@realpath_cache_size = 2M@' ${php_install_dir}/etc/php.ini
-    sed -i 's@^disable_functions.*@disable_functions = passthru,exec,system,chroot,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_restore,dl,readlink,symlink,popepassthru,stream_socket_server,fsocket,popen@' ${php_install_dir}/etc/php.ini
+    sed -i 's@^disable_functions.*@disable_functions = passthru,system,chroot,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_restore,dl,readlink,symlink,popepassthru,stream_socket_server,fsocket,popen@' ${php_install_dir}/etc/php.ini
     [ -e /usr/sbin/sendmail ] && sed -i 's@^;sendmail_path.*@sendmail_path = /usr/sbin/sendmail -t -i@' ${php_install_dir}/etc/php.ini
     sed -i "s@^;curl.cainfo.*@curl.cainfo = \"/etc/pki/tls/certs/ca-bundle.crt\"@" ${php_install_dir}/etc/php.ini
     sed -i "s@^;openssl.cafile.*@openssl.cafile = \"/etc/pki/tls/certs/ca-bundle.crt\"@" ${php_install_dir}/etc/php.ini
@@ -403,20 +358,9 @@ Install_PHP() {
 [opcache]
 zend_extension=opcache.so
 opcache.enable=1
-opcache.enable_cli=1
-opcache.memory_consumption=512M
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=100000
-opcache.max_wasted_percentage=5
-opcache.use_cwd=1
-opcache.validate_timestamps=1
-#Change
-;opcache.revalidate_freq=60
-#Change
-;opcache.save_comments=0
-opcache.consistency_checks=0
-;opcache.optimization_level=0
-# Nextcloud
+opcache.memory_consumption=128
 opcache.save_comments=1
 opcache.revalidate_freq=1
 EOF
