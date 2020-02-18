@@ -401,6 +401,7 @@ EOF
     echo "Nginx-${Nginx_version} installed Failed! "
     echo "Nginx-${Nginx_version} installed Failed! "
     echo "Nginx-${Nginx_version} installed Failed! "
+  fi
 }
 
 Install_libiconv() {
