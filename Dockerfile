@@ -1,4 +1,4 @@
-FROM fedora:rawhide
+FROM fedora:latest
 
 LABEL maintainer="Kylin --www.xyz.blue"
 

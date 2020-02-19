@@ -9,8 +9,6 @@ PostgreSQL="postgresql postgresql-server postgresql-devel"
 Change_Password="cracklib-dicts"
 pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56} ${PostgreSQL} ${Change_Password}"
 
-dnf clean packages
-
 for Package in ${pkgList}; do
   dnf -y install ${Package}
   done
