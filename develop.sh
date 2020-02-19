@@ -5,9 +5,10 @@ Apache_pkg="jansson jansson-devel diffutils nghttp2 libnghttp2 libnghttp2-devel"
 PHP_pkg="curl curl-devel freetype freetype-devel argon2 libargon2 libargon2-devel libsodium libsodium-devel mhash mhash-devel gettext gettext-devel"
 PHP_73="libzip libzip-devel"
 PHP_56="re2c"
+Nginx="cargo"
 PostgreSQL="postgresql postgresql-server postgresql-devel"
 Change_Password="cracklib-dicts"
-pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56} ${PostgreSQL} ${Change_Password}"
+pkgList="${pkgList} ${Apache_pkg} ${PHP_pkg} ${PHP_73} ${PHP_56} ${Nginx} ${PostgreSQL} ${Change_Password}"
 
 for Package in ${pkgList}; do
   dnf -y install ${Package}
@@ -272,10 +273,12 @@ Install_Nginx() {
     echo "Nginx-${Nginx_version} download successfully! "
     echo "Nginx-${Nginx_version} download successfully! "
     tar xzf nginx-${Nginx_version}.tar.gz
+    git clone --recursive https://github.com/cloudflare/quiche
     cd nginx-${Nginx_version}
+    patch -p01 < ../quiche/extras/nginx/nginx-1.16.patch
     mkdir -p ${nginx_install_dir} ${nginx_config_dir}
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc
-    ./configure --prefix=${nginx_install_dir} --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=/usr/include/openssl --with-pcre --with-pcre-jit --with-ld-opt='-ljemalloc' ${nginx_modules_options}
+    ./configure --prefix=${nginx_install_dir} --user=${run_user} --group=${run_user} --build="quiche-$(git --git-dir=../quiche/.git rev-parse --short HEAD)" --with-http_stub_status_module --with-http_v2_module --with-http_v3_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../quiche/deps/boringssl --with-quiche=../quiche --with-pcre --with-pcre-jit --with-ld-opt='-ljemalloc' ${nginx_modules_options}
     make -j ${THREAD} && make install
   else
     echo "Nginx-${Nginx_version} download Failed! "
