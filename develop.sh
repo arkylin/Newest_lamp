@@ -275,7 +275,7 @@ Install_Nginx() {
     cd nginx-${Nginx_version}
     mkdir -p ${nginx_install_dir} ${nginx_config_dir}
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc
-    ./configure --prefix=${nginx_install_dir} --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl --with-pcre --with-pcre-jit --with-ld-opt='-ljemalloc' ${nginx_modules_options}
+    ./configure --prefix=${nginx_install_dir} --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=/usr/include/openssl --with-pcre --with-pcre-jit --with-ld-opt='-ljemalloc' ${nginx_modules_options}
     make -j ${THREAD} && make install
   else
     echo "Nginx-${Nginx_version} download Failed! "
